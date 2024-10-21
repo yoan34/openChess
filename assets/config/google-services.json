@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "1009373340551",
+    "project_id": "openchess-64208",
+    "storage_bucket": "openchess-64208.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1009373340551:android:5daab257b8c40b7abe6922",
+        "android_client_info": {
+          "package_name": "com.yoandev.openchess"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyA8LSBywugcY5iBgjzuuT9BjHEbaLq37Wg"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
