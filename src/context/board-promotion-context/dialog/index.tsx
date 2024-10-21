@@ -1,17 +1,16 @@
-import { useChessboardProps } from '../../../context/props-context/hooks';
-import React from 'react';
-import type { PieceType } from 'chess.js';
-import Animated, { FadeIn, FadeOut } from 'react-native-reanimated';
+import type { BoardPromotionContextState } from '@/src/context/board-promotion-context'
+import { DialogPiece } from '@/src/context/board-promotion-context/dialog/dialog-piece'
+import { useChessboardProps } from '@/src/context/props-context/hooks'
+import type { PieceType } from 'chess.js'
+import React from 'react'
+import { StyleSheet } from 'react-native'
+import Animated, { FadeIn, FadeOut } from 'react-native-reanimated'
 
-import { StyleSheet } from 'react-native';
-import type { BoardPromotionContextState } from '..';
-import { DialogPiece } from './dialog-piece';
-
-const PROMOTION_PIECES: PieceType[] = ['q', 'r', 'n', 'b'];
+const PROMOTION_PIECES: PieceType[] = ['q', 'r', 'n', 'b']
 
 const PromotionDialog: React.FC<Required<BoardPromotionContextState>> =
   React.memo(({ type, onSelect }) => {
-    const { boardSize } = useChessboardProps();
+    const { boardSize } = useChessboardProps()
 
     return (
       <Animated.View
@@ -21,9 +20,9 @@ const PromotionDialog: React.FC<Required<BoardPromotionContextState>> =
           {
             width: boardSize / 3,
             left: boardSize / 3,
-            top: boardSize / 3,
+            top: boardSize / 3
           },
-          styles.container,
+          styles.container
         ]}
       >
         {PROMOTION_PIECES.map((piece, i) => {
@@ -36,11 +35,11 @@ const PromotionDialog: React.FC<Required<BoardPromotionContextState>> =
               type={type}
               onSelectPiece={onSelect}
             />
-          );
+          )
         })}
       </Animated.View>
-    );
-  });
+    )
+  })
 
 const styles = StyleSheet.create({
   container: {
@@ -55,10 +54,10 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.2,
     shadowOffset: {
       height: 5,
-      width: 0,
+      width: 0
     },
-    flexWrap: 'wrap',
-  },
-});
+    flexWrap: 'wrap'
+  }
+})
 
-export { PromotionDialog };
+export { PromotionDialog }

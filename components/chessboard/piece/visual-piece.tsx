@@ -1,15 +1,15 @@
-import React from 'react';
-import { Image, ImageProps } from 'react-native';
-import { PIECES } from '../../constants';
-import { useChessboardProps } from '../../context/props-context/hooks';
-import type { PieceType } from '../../types';
+import { PIECES } from '@/constants/constants'
+import { useChessboardProps } from '@/src/context/props-context/hooks'
+import type { PieceType } from '@/src/types'
+import React from 'react'
+import { Image, ImageProps } from 'react-native'
 
 type ChessPieceType = {
-  id: PieceType;
-} & Partial<ImageProps>;
+  id: PieceType
+} & Partial<ImageProps>
 
 const ChessPiece: React.FC<ChessPieceType> = React.memo(({ id, ...rest }) => {
-  const { pieceSize, renderPiece } = useChessboardProps();
+  const { pieceSize, renderPiece } = useChessboardProps()
 
   return (
     renderPiece?.(id) ?? (
@@ -19,7 +19,7 @@ const ChessPiece: React.FC<ChessPieceType> = React.memo(({ id, ...rest }) => {
         source={PIECES[id]}
       />
     )
-  );
-});
+  )
+})
 
-export { ChessPiece };
+export { ChessPiece }

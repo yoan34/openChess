@@ -1,4 +1,4 @@
-import { textStyles } from '@/constants/TextStyles'
+import { textStyles } from '@/constants/textStyles'
 import React from 'react'
 import { Text, type TextProps } from 'react-native'
 

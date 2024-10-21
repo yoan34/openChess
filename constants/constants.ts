@@ -1,20 +1,32 @@
-import type { PiecesType } from './types';
+import bb from '@/assets/chessboard/bb.png'
+import bk from '@/assets/chessboard/bk.png'
+import bn from '@/assets/chessboard/bn.png'
+import bp from '@/assets/chessboard/bp.png'
+import bq from '@/assets/chessboard/bq.png'
+import br from '@/assets/chessboard/br.png'
+import wb from '@/assets/chessboard/wb.png'
+import wk from '@/assets/chessboard/wk.png'
+import wn from '@/assets/chessboard/wn.png'
+import wp from '@/assets/chessboard/wp.png'
+import wq from '@/assets/chessboard/wq.png'
+import wr from '@/assets/chessboard/wr.png'
+import type { PiecesType } from '@/src/types'
 
 const PIECES: PiecesType = {
-  br: require('./assets/br.png'),
-  bp: require('./assets/bp.png'),
-  bn: require('./assets/bn.png'),
-  bb: require('./assets/bb.png'),
-  bq: require('./assets/bq.png'),
-  bk: require('./assets/bk.png'),
-  wr: require('./assets/wr.png'),
-  wn: require('./assets/wn.png'),
-  wb: require('./assets/wb.png'),
-  wq: require('./assets/wq.png'),
-  wk: require('./assets/wk.png'),
-  wp: require('./assets/wp.png'),
-};
+  br,
+  bp,
+  bn,
+  bb,
+  bq,
+  bk,
+  wr,
+  wn,
+  wb,
+  wq,
+  wk,
+  wp
+}
 
-const assets = Object.values(PIECES);
+const assets = Object.values(PIECES)
 
-export { assets, PIECES };
+export { assets, PIECES }

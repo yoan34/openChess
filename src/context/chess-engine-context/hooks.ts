@@ -1,7 +1,6 @@
-import { useContext } from 'react';
-
-import { ChessEngineContext } from './index';
+import { ChessEngineContext } from '@/src/context/chess-engine-context'
+import { useContext } from 'react'
 
 export const useChessEngine = () => {
-  return useContext(ChessEngineContext);
-};
+  return useContext(ChessEngineContext)
+}

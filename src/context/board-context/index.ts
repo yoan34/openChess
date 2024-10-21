@@ -1,20 +1,18 @@
-import type { ChessInstance, PieceType } from 'chess.js';
-import React, { createContext } from 'react';
-import type { Player } from '../../types';
+import type { Player } from '@/src/types'
+import type { Chess, PieceSymbol } from 'chess.js'
+import React, { createContext } from 'react'
 
-const BoardContext = createContext<ReturnType<ChessInstance['board']>>(
-  {} as any
-);
+const defaultBoard: ReturnType<Chess['board']> = Array(8)
+  .fill(null)
+  .map(() => Array(8).fill(null))
+const BoardContext = createContext<ReturnType<Chess['board']>>(defaultBoard)
 
 const BoardSetterContext = createContext<
   React.Dispatch<
     React.SetStateAction<
-      ({
-        type: PieceType;
-        color: Player;
-      } | null)[][]
+      Array<Array<{ type: PieceSymbol; color: Player } | null>>
     >
-  >
->({} as any);
+  > | null
+>(null)
 
-export { BoardContext, BoardSetterContext };
+export { BoardContext, BoardSetterContext }

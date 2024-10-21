@@ -24,14 +24,14 @@ function TabLayout () {
       })}
     >
       <Tabs.Screen
-        name="homepage"
+        name="play"
         options={{
           headerShown: false,
           tabBarIcon: ({ focused }) => (focused ? <NavGridActive/> : <NavGrid/>)
         }}
       />
       <Tabs.Screen
-        name="dashboard"
+        name="openings"
         options={{
           headerShown: false,
           tabBarIcon: ({ focused }) => (focused ? <NavDashboardActive/> : <NavDashboard/>)

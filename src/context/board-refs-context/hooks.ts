@@ -1,11 +1,10 @@
-import { useContext } from 'react';
-
-import { PieceRefsContext, SquareRefsContext } from './index';
+import { PieceRefsContext, SquareRefsContext } from '@/src/context/board-refs-context'
+import { useContext } from 'react'
 
 export const usePieceRefs = () => {
-  return useContext(PieceRefsContext);
-};
+  return useContext(PieceRefsContext)
+}
 
 export const useSquareRefs = () => {
-  return useContext(SquareRefsContext);
-};
+  return useContext(SquareRefsContext)
+}

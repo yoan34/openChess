@@ -1,71 +1,77 @@
-import React, { useImperativeHandle, useRef } from 'react';
-import { View, StyleSheet } from 'react-native';
-
-import Background from './components/chessboard-background';
-import { HighlightedSquares } from './components/highlighted-squares';
-import { Pieces } from './components/pieces';
-import { SuggestedDots } from './components/suggested-dots';
-import { ChessboardContextProvider } from './context/board-context-provider';
-import type { ChessboardRef } from './context/board-refs-context';
+import Background from '@/components/chessboard/chessboard-background'
+import { HighlightedSquares } from '@/components/chessboard/highlighted-squares'
+import { Pieces } from '@/components/chessboard/pieces'
+import { SuggestedDots } from '@/components/chessboard/suggested-dots'
+import { ChessboardContextProvider } from '@/src/context/board-context-provider'
+import { useStartPosition } from "@/src/context/board-flipped/hooks"
+import type { ChessboardRef } from '@/src/context/board-refs-context'
 import {
   ChessboardProps,
-  ChessboardPropsContextProvider,
-} from './context/props-context';
-import { useChessboardProps } from './context/props-context/hooks';
-import type { ChessboardState } from './helpers/get-chessboard-state';
-import { GestureHandlerRootView } from 'react-native-gesture-handler';
+  ChessboardPropsContextProvider
+} from '@/src/context/props-context'
+import { useChessboardProps } from '@/src/context/props-context/hooks'
+import React, { useImperativeHandle, useRef } from 'react'
+import { View, StyleSheet } from 'react-native'
+import { GestureHandlerRootView } from 'react-native-gesture-handler'
 
 const styles = StyleSheet.create({
   container: {
-    aspectRatio: 1,
-  },
-});
+    aspectRatio: 1
+  }
+})
 
-const Chessboard: React.FC = React.memo(() => {
-  const { boardSize } = useChessboardProps();
-
+const Chessboard: React.FC<ChessboardProps> = React.memo(() => {
+  const { boardSize } = useChessboardProps()
+  const { startPosition } = useStartPosition()
+  const isFlipped = startPosition === 'black'
   return (
     <View style={[styles.container, { width: boardSize }]}>
-      <Background />
-      <Pieces />
-      <HighlightedSquares />
-      <SuggestedDots />
+      <Background isFlipped={isFlipped}/>
+      <Pieces isFlipped={isFlipped}/>
+      <HighlightedSquares isFlipped={isFlipped}/>
+      <SuggestedDots isFlipped={isFlipped}/>
     </View>
-  );
-});
+  )
+})
 
 const ChessboardContainerComponent = React.forwardRef<
   ChessboardRef,
   ChessboardProps
 >((props, ref) => {
-  const chessboardRef = useRef<ChessboardRef>(null);
+  const chessboardRef = useRef<ChessboardRef>(null)
 
   useImperativeHandle(
     ref,
     () => ({
-      move: (params) => chessboardRef.current?.move?.(params),
+      move: async (params) => await chessboardRef.current?.move?.(params),
       undo: () => chessboardRef.current?.undo(),
       highlight: (params) => chessboardRef.current?.highlight(params),
       resetAllHighlightedSquares: () =>
         chessboardRef.current?.resetAllHighlightedSquares(),
-      getState: () => chessboardRef?.current?.getState() as ChessboardState,
-      resetBoard: (params) => chessboardRef.current?.resetBoard(params),
+      getState: () => {
+        if (chessboardRef?.current) {
+          return chessboardRef.current.getState()
+        } else {
+          throw new Error('chessboardRef is null or undefined')
+        }
+      },
+      resetBoard: (params) => chessboardRef.current?.resetBoard(params)
     }),
     []
-  );
-
+  )
+  console.log(props)
   return (
     <GestureHandlerRootView>
       <ChessboardPropsContextProvider {...props}>
         <ChessboardContextProvider ref={chessboardRef} fen={props.fen}>
-          <Chessboard />
+          <Chessboard startPosition={props.startPosition}/>
         </ChessboardContextProvider>
       </ChessboardPropsContextProvider>
     </GestureHandlerRootView>
-  );
-});
+  )
+})
 
-const ChessboardContainer = React.memo(ChessboardContainerComponent);
+const ChessboardContainer = React.memo(ChessboardContainerComponent)
 
-export type { ChessboardRef };
-export default ChessboardContainer;
+export type { ChessboardRef }
+export default ChessboardContainer

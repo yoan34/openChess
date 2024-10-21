@@ -2,7 +2,6 @@ import EStyleSheet from '@/constants/Theme'
 import { Link, type LinkProps } from 'expo-router'
 import React from 'react'
 import { View, Pressable, type ViewStyle } from 'react-native'
-import LinearGradient from 'react-native-linear-gradient'
 
 type BasePropsType = {
   buttonStyle?: ViewStyle
@@ -20,28 +19,17 @@ type PressType = BasePropsType & {
 
 type Props = RouteType | PressType
 
-function Button({
-   buttonStyle,
-   applyPressStyle = false,
-   children,
-   ...rest
- }: Props) {
+function Button ({
+  buttonStyle,
+  applyPressStyle = false,
+  children,
+  ...rest
+}: Props) {
   const renderButton = (pressedStyle?: ViewStyle) => {
-    if (buttonStyle) {
-      return (
-        <View style={[styles.button, buttonStyle, pressedStyle]}>
-          {children}
-        </View>
-      )
-    }
-
     return (
-      <LinearGradient
-        colors={[EStyleSheet.value('$secondaryLGDark'), EStyleSheet.value('$secondaryLGLight')]}
-        style={[styles.button, pressedStyle]}
-      >
+      <View style={[styles.button, buttonStyle, pressedStyle]}>
         {children}
-      </LinearGradient>
+      </View>
     )
   }
 
@@ -74,12 +62,8 @@ const styles = EStyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     textAlign: 'center',
-    borderRadius: 16,
-    shadowColor: '$primaryShadowColor',
-    shadowOffset: { width: 0, height: 8 },
-    shadowOpacity: 0.24,
-    shadowRadius: 16,
-    elevation: 0
+    borderRadius: 50,
+    backgroundColor: '$primaryColor'
   },
   buttonPressed: {
     backgroundColor: '#0044CC'

@@ -1,4 +1,4 @@
-import type { ChessInstance } from 'chess.js';
+import type { ChessInstance } from 'chess.js'
 
 type ChessboardStateFunctions = Pick<
   ChessInstance,
@@ -10,13 +10,13 @@ type ChessboardStateFunctions = Pick<
   | 'insufficient_material'
   | 'game_over'
   | 'fen'
->;
+>
 
 type RecordReturnTypes<T> = {
-  readonly [P in keyof T]: T[P] extends () => any ? ReturnType<T[P]> : T[P];
-};
+  readonly [P in keyof T]: T[P] extends () => infer R ? R : T[P]
+}
 
-export type ChessboardState = RecordReturnTypes<ChessboardStateFunctions>;
+export type ChessboardState = RecordReturnTypes<ChessboardStateFunctions>
 
 export const getChessboardState = (chess: ChessInstance): ChessboardState => {
   return {
@@ -27,6 +27,6 @@ export const getChessboardState = (chess: ChessInstance): ChessboardState => {
     in_threefold_repetition: chess.in_threefold_repetition(),
     insufficient_material: chess.insufficient_material(),
     game_over: chess.game_over(),
-    fen: chess.fen(),
-  };
-};
+    fen: chess.fen()
+  }
+}

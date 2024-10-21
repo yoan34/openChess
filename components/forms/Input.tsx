@@ -4,6 +4,7 @@ import { MaterialIcons } from '@expo/vector-icons'
 import AntDesign from '@expo/vector-icons/AntDesign'
 import Ionicons from '@expo/vector-icons/Ionicons'
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons'
+import { Link, type LinkProps } from 'expo-router'
 import React, { useState } from 'react'
 import {
   View,
@@ -17,6 +18,8 @@ interface InputProps {
   icon?: 'mail' | 'person' | 'lock' | 'none'
   label?: string
   placeholder?: string
+  linkText?: string
+  link?: LinkProps<string>['href']
   isPassword?: boolean
   value: string
   onChangeText: (text: string) => void
@@ -28,6 +31,8 @@ function Input ({
   icon,
   label,
   placeholder,
+  link,
+  linkText,
   value,
   onChangeText,
   onBlur,
@@ -44,19 +49,38 @@ function Input ({
     <View style={styles.container}>
       <View style={styles.header}>
         <ThemedText variant="inputLabel">{label}</ThemedText>
+        {link && (
+          <Link href={link}>
+            <ThemedText variant="boldTextStyle">{linkText}</ThemedText>
+          </Link>
+        )}
       </View>
       {error && <ThemedText variant="formError">{error}</ThemedText>}
       <View style={[styles.inputContainer, error !== undefined && styles.inputContainerError]}>
-        {icon === 'mail' && <Ionicons name="mail-outline" size={24} color={error ? 'red' : EStyleSheet.value('$textColorNormal')}/>}
+        {icon === 'mail' &&
+          <Ionicons
+            name="mail-outline"
+            size={24}
+            color={error ? 'red' : EStyleSheet.value('$textColorLightGrey')}
+          />}
         {icon === 'lock' &&
-            <AntDesign name="lock" size={24} color={error ? 'red' : EStyleSheet.value('$textColorNormal')} style={styles.leftIcon}/>}
+          <AntDesign
+            name="lock"
+            size={24}
+            color={error ? 'red' : EStyleSheet.value('$textColorLightGrey')}
+            style={styles.leftIcon}
+          />}
         {icon === 'person' &&
-            <MaterialCommunityIcons name="account-circle-outline" size={24} color={error ? 'red' : EStyleSheet.value('$textColorNormal')}/>}
+          <MaterialCommunityIcons
+            name="account-circle-outline"
+            size={24}
+            color={error ? 'red' : EStyleSheet.value('$textColorLightGrey')}
+          />}
         <TextInput
-          autoCapitalize='none'
+          autoCapitalize="none"
           style={styles.input}
           placeholder={placeholder}
-          placeholderTextColor={error ? 'red' : EStyleSheet.value('$textColorNormal')}
+          placeholderTextColor={error ? 'red' : EStyleSheet.value('$textColorLightGrey')}
           value={value}
           onChangeText={onChangeText}
           onBlur={onBlur}
@@ -67,7 +91,7 @@ function Input ({
             <MaterialIcons
               name={isPasswordVisible ? 'visibility' : 'visibility-off'}
               size={24}
-              color={error ? 'red' : EStyleSheet.value('$textColorNormal')}
+              color={error ? 'red' : EStyleSheet.value('$textColorLightGrey')}
               style={styles.rightIcon}
             />
           </Pressable>
@@ -94,20 +118,22 @@ const styles = EStyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     borderWidth: 1,
-    borderColor: '$primaryColorBorder',
-    borderRadius: 12,
-    backgroundColor: '#3C1C56',
-    padding: 12
+    borderColor: '$textColorLightGrey',
+    borderRadius: 50,
+    backgroundColor: 'white',
+    paddingVertical: 8,
+    paddingHorizontal: 12
   },
   inputContainerError: {
     borderColor: 'red'
   },
   input: {
-    color: '$textColorNormal',
+    color: '$textColorLightGrey',
     fontSize: 14,
     flex: 1,
     paddingLeft: 8,
     fontFamily: 'UrbanistSemiBold'
+
   },
   leftIcon: {
     marginRight: 8

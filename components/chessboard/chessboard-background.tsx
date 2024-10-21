@@ -1,46 +1,45 @@
-/* eslint-disable react-native/no-inline-styles */
-import React from 'react';
-import { View, StyleSheet, Text } from 'react-native';
-import { useChessboardProps } from '../context/props-context/hooks';
+import { useChessboardProps } from '@/src/context/props-context/hooks'
+import React from 'react'
+import { View, StyleSheet, Text } from 'react-native'
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    flexDirection: 'row',
-  },
-});
+    flexDirection: 'row'
+  }
+})
 
 type BackgroundProps = {
-  letters: boolean;
-  numbers: boolean;
-};
+  letters: boolean
+  numbers: boolean
+}
 
 interface BaseProps extends BackgroundProps {
-  white: boolean;
+  white: boolean
 }
 
 interface RowProps extends BaseProps {
-  row: number;
+  row: number
 }
 
 interface SquareProps extends RowProps {
-  col: number;
+  col: number
 }
 
 const Square = React.memo(
   ({ white, row, col, letters, numbers }: SquareProps) => {
-    const { colors } = useChessboardProps();
-    const backgroundColor = white ? colors.black : colors.white;
-    const color = white ? colors.white : colors.black;
-    const textStyle = { fontWeight: '500' as const, fontSize: 10, color };
-    const newLocal = col === 0;
+    const { colors } = useChessboardProps()
+    const backgroundColor = white ? colors.black : colors.white
+    const color = white ? colors.white : colors.black
+    const textStyle = { fontWeight: '500' as const, fontSize: 10, color }
+    const newLocal = col === 0
     return (
       <View
         style={{
           flex: 1,
           backgroundColor,
           padding: 4,
-          justifyContent: 'space-between',
+          justifyContent: 'space-between'
         }}
       >
         {numbers && (
@@ -54,12 +53,12 @@ const Square = React.memo(
           </Text>
         )}
       </View>
-    );
+    )
   }
-);
+)
 
 const Row = React.memo(({ white, row, ...rest }: RowProps) => {
-  const offset = white ? 0 : 1;
+  const offset = white ? 0 : 1
   return (
     <View style={styles.container}>
       {new Array(8).fill(0).map((_, i) => (
@@ -72,14 +71,18 @@ const Row = React.memo(({ white, row, ...rest }: RowProps) => {
         />
       ))}
     </View>
-  );
-});
+  )
+})
 
-const Background: React.FC = React.memo(() => {
-  const { withLetters, withNumbers } = useChessboardProps();
+const Background: React.FC<{ isFlipped: boolean }> = React.memo(({ isFlipped }) => {
+  const { withLetters, withNumbers } = useChessboardProps()
+  const rows = new Array(8).fill(0)
+  if (isFlipped) {
+    rows.reverse()
+  }
   return (
     <View style={{ flex: 1 }}>
-      {new Array(8).fill(0).map((_, i) => (
+      {rows.map((_, i) => (
         <Row
           key={i}
           white={i % 2 === 0}
@@ -89,7 +92,7 @@ const Background: React.FC = React.memo(() => {
         />
       ))}
     </View>
-  );
-});
+  )
+})
 
-export default Background;
+export default Background

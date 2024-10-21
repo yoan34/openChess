@@ -1,27 +1,26 @@
-import React from 'react';
-import { useChessboardProps } from '../context/props-context/hooks';
+import Piece from '@/components/chessboard/piece'
+import { useBoard } from '@/src/context/board-context/hooks'
+import { usePieceRefs } from '@/src/context/board-refs-context/hooks'
+import { useChessboardProps } from '@/src/context/props-context/hooks'
+import { useReversePiecePosition } from '@/src/notation'
+import React from 'react'
 
-import { useBoard } from '../context/board-context/hooks';
-import { usePieceRefs } from '../context/board-refs-context/hooks';
-
-import Piece from './piece';
-import { useReversePiecePosition } from '../notation';
-
-const Pieces = React.memo(() => {
-  const board = useBoard();
-  const refs = usePieceRefs();
-  const { pieceSize } = useChessboardProps();
-  const { toPosition } = useReversePiecePosition();
+const Pieces: React.FC<{ isFlipped: boolean }> = React.memo(({ isFlipped }) => {
+  const board = useBoard()
+  const refs = usePieceRefs()
+  const { pieceSize } = useChessboardProps()
+  const { toPosition } = useReversePiecePosition()
+  const renderedBoard = isFlipped ? [...board].reverse() : board
 
   return (
     <>
-      {board.map((row, y) =>
+      {renderedBoard.map((row, y) =>
         row.map((piece, x) => {
           if (piece !== null) {
             const square = toPosition({
               x: x * pieceSize,
-              y: y * pieceSize,
-            });
+              y: y * pieceSize
+            })
 
             return (
               <Piece
@@ -32,13 +31,13 @@ const Pieces = React.memo(() => {
                 square={square}
                 size={pieceSize}
               />
-            );
+            )
           }
-          return null;
+          return null
         })
       )}
     </>
-  );
-});
+  )
+})
 
-export { Pieces };
+export { Pieces }

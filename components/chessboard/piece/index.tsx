@@ -1,110 +1,114 @@
-import type { Move, Square } from 'chess.js';
-import React, { useCallback, useImperativeHandle } from 'react';
-import { Gesture, GestureDetector } from 'react-native-gesture-handler';
+import { ChessPiece } from '@/components/chessboard/piece/visual-piece'
+import { useBoardOperations } from '@/src/context/board-operations-context/hooks'
+import { useBoardPromotion } from '@/src/context/board-promotion-context/hooks'
+import { usePieceRefs } from '@/src/context/board-refs-context/hooks'
+import { useChessEngine } from '@/src/context/chess-engine-context/hooks'
+import { useChessboardProps } from '@/src/context/props-context/hooks'
+import { useReversePiecePosition } from '@/src/notation'
+import type { PieceType, Vector } from '@/src/types'
+import type { Move, Square } from 'chess.js'
+import React, { useCallback, useImperativeHandle } from 'react'
+import { Gesture, GestureDetector } from 'react-native-gesture-handler'
 import Animated, {
   runOnJS,
   useAnimatedStyle,
   useDerivedValue,
   useSharedValue,
-  withTiming,
-} from 'react-native-reanimated';
-import { useChessboardProps } from '../../context/props-context/hooks';
-import { useBoardOperations } from '../../context/board-operations-context/hooks';
-import { useBoardPromotion } from '../../context/board-promotion-context/hooks';
-import { usePieceRefs } from '../../context/board-refs-context/hooks';
-import { useChessEngine } from '../../context/chess-engine-context/hooks';
-import { useReversePiecePosition } from '../../notation';
-import type { PieceType, Vector } from '../../types';
-
-import { ChessPiece } from './visual-piece';
+  withTiming
+} from 'react-native-reanimated'
 
 type PieceProps = {
-  id: PieceType;
-  startPosition: Vector;
-  square: Square;
-  size: number;
-};
+  id: PieceType
+  startPosition: Vector
+  square: Square
+  size: number
+}
 
 export type ChessPieceRef = {
-  moveTo: (square: Square) => Promise<Move | undefined>;
-  enable: (activate: boolean) => void;
-};
+  moveTo: (square: Square) => Promise<Move | undefined>
+  enable: (activate: boolean) => void
+}
+
+function isMove(obj: unknown): obj is Move {
+  return obj && typeof obj === 'object' && 'from' in obj && 'to' in obj
+}
 
 const Piece = React.memo(
   React.forwardRef<ChessPieceRef, PieceProps>(
     ({ id, startPosition, square, size }, ref) => {
-      const chess = useChessEngine();
-      const refs = usePieceRefs();
-      const pieceEnabled = useSharedValue(true);
-      const { isPromoting } = useBoardPromotion();
+      const chess = useChessEngine()
+      const refs = usePieceRefs()
+      const pieceEnabled = useSharedValue(true)
+      const { isPromoting } = useBoardPromotion()
       const { onSelectPiece, onMove, selectedSquare, turn } =
-        useBoardOperations();
+        useBoardOperations()
 
       const {
         durations: { move: moveDuration },
-        gestureEnabled: gestureEnabledFromChessboardProps,
-      } = useChessboardProps();
+        gestureEnabled: gestureEnabledFromChessboardProps
+      } = useChessboardProps()
 
       const gestureEnabled = useDerivedValue(
         () => turn.value === id.charAt(0) && gestureEnabledFromChessboardProps,
         [id, gestureEnabledFromChessboardProps]
-      );
+      )
 
-      const { toPosition, toTranslation } = useReversePiecePosition();
+      const { toPosition, toTranslation } = useReversePiecePosition()
 
-      const isGestureActive = useSharedValue(false);
-      const offsetX = useSharedValue(0);
-      const offsetY = useSharedValue(0);
-      const scale = useSharedValue(1);
+      const isGestureActive = useSharedValue(false)
+      const offsetX = useSharedValue(0)
+      const offsetY = useSharedValue(0)
+      const scale = useSharedValue(1)
 
-      const translateX = useSharedValue(startPosition.x * size);
-      const translateY = useSharedValue(startPosition.y * size);
+      const translateX = useSharedValue(startPosition.x * size)
+      const translateY = useSharedValue(startPosition.y * size)
 
       const validateMove = useCallback(
         (from: Square, to: Square) => {
           return chess
             .moves({ verbose: true })
-            .find((m) => m.from === from && m.to === to);
+            .find((m) => m.from === from && m.to === to)
         },
         [chess]
-      );
+      )
 
       const wrappedOnMoveForJSThread = useCallback(
         ({ move }: { move: Move }) => {
-          onMove(move.from, move.to);
+          onMove(move.from, move.to)
         },
         [onMove]
-      );
+      )
 
       const moveTo = useCallback(
-        (from: Square, to: Square) => {
-          return new Promise<Move | undefined>((resolve) => {
-            const move = validateMove(from, to);
-            const { x, y } = toTranslation(move ? move.to : from);
+        async (from: Square, to: Square) => {
+          return await new Promise<Move | undefined>((resolve) => {
+            const move = validateMove(from, to)
+            const { x, y } = toTranslation(move ? move.to : from)
+            console.log(`x=${x} y=${y}`)
             translateX.value = withTiming(x, { duration: moveDuration }, () => {
-              offsetX.value = translateX.value;
-            });
+              offsetX.value = translateX.value
+            })
             translateY.value = withTiming(
               y,
               { duration: moveDuration },
               (isFinished) => {
-                if (!isFinished) return;
-                offsetY.value = translateY.value;
-                isGestureActive.value = false;
+                if (!isFinished) return
+                offsetY.value = translateY.value
+                isGestureActive.value = false
                 if (move) {
-                  runOnJS(wrappedOnMoveForJSThread)({ move });
+                  runOnJS(wrappedOnMoveForJSThread)({ move })
                   // Ideally I must call the resolve method
                   // inside the "wrappedOnMoveForJSThread" after
                   // the "onMove" function.
                   // Unfortunately I'm not able to pass a
                   // function in the RunOnJS params
-                  runOnJS(resolve)(move);
+                  runOnJS(resolve)(move)
                 } else {
-                  runOnJS(resolve)(undefined);
+                  runOnJS(resolve)(undefined)
                 }
               }
-            );
-          });
+            )
+          })
         },
         [
           isGestureActive,
@@ -115,70 +119,73 @@ const Piece = React.memo(
           translateX,
           translateY,
           validateMove,
-          wrappedOnMoveForJSThread,
+          wrappedOnMoveForJSThread
         ]
-      );
+      )
 
       const movePiece = useCallback(
-        (to: Square) => {
-          const from = toPosition({ x: offsetX.value, y: offsetY.value });
-          moveTo(from, to);
+        async (to: Square) => {
+          const from = toPosition({ x: offsetX.value, y: offsetY.value })
+          await moveTo(from, to)
         },
         [moveTo, offsetX.value, offsetY.value, toPosition]
-      );
+      )
 
       useImperativeHandle(
         ref,
         () => {
           return {
-            moveTo: (to: Square) => {
-              return moveTo(square, to);
+            moveTo: async (to: Square) => {
+              return await moveTo(square, to)
             },
             enable: (active: boolean) => {
-              pieceEnabled.value = active;
-            },
-          };
+              pieceEnabled.value = active
+            }
+          }
         },
         [moveTo, pieceEnabled, square]
-      );
+      )
 
       const onStartTap = useCallback(
         // eslint-disable-next-line no-shadow
         (square: Square) => {
-          'worklet';
+          'worklet'
           if (!onSelectPiece) {
-            return;
+            return
           }
-          runOnJS(onSelectPiece)(square);
+          runOnJS(onSelectPiece)(square)
         },
         [onSelectPiece]
-      );
+      )
 
       const globalMoveTo = useCallback(
-        (move: Move) => {
-          refs?.current?.[move.from].current.moveTo?.(move.to);
+        async (move: Move) => {
+          await refs?.current?.[move.from].current.moveTo?.(move.to)
         },
         [refs]
-      );
+      )
 
       const handleOnBegin = useCallback(() => {
         const currentSquare = toPosition({
           x: translateX.value,
-          y: translateY.value,
-        });
+          y: translateY.value
+        })
 
-        const previousTappedSquare = selectedSquare.value;
+        const previousTappedSquare = selectedSquare.value
         const move =
           previousTappedSquare &&
-          validateMove(previousTappedSquare, currentSquare);
-
-        if (move) {
-          runOnJS(globalMoveTo)(move);
-          return;
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
+          validateMove(previousTappedSquare, currentSquare)
+        console.log(`handleOnBegin:     x=${translateX.value} y=${translateY.value}  currentSquare=${currentSquare}`)
+        if (move && isMove(move)) {
+          runOnJS(globalMoveTo)(move)
+          return
+        } else {
+          console.log('Invalid move or move is not of the correct type')
         }
-        if (!gestureEnabled.value) return;
-        scale.value = withTiming(1.2);
-        onStartTap(square);
+        if (!gestureEnabled.value) return
+        scale.value = withTiming(1.2)
+        onStartTap(square)
       }, [
         gestureEnabled.value,
         globalMoveTo,
@@ -189,34 +196,34 @@ const Piece = React.memo(
         toPosition,
         translateX.value,
         translateY.value,
-        validateMove,
-      ]);
+        validateMove
+      ])
 
       const gesture = Gesture.Pan()
         .enabled(!isPromoting && pieceEnabled.value)
         .onBegin(() => {
-          offsetX.value = translateX.value;
-          offsetY.value = translateY.value;
-          runOnJS(handleOnBegin)();
+          offsetX.value = translateX.value
+          offsetY.value = translateY.value
+          runOnJS(handleOnBegin)()
         })
         .onStart(() => {
-          if (!gestureEnabled.value) return;
-          isGestureActive.value = true;
+          if (!gestureEnabled.value) return
+          isGestureActive.value = true
         })
         .onUpdate(({ translationX, translationY }) => {
-          if (!gestureEnabled.value) return;
-          translateX.value = offsetX.value + translationX;
-          translateY.value = offsetY.value + translationY;
+          if (!gestureEnabled.value) return
+          translateX.value = offsetX.value + translationX
+          translateY.value = offsetY.value + translationY
         })
         .onEnd(() => {
-          if (!gestureEnabled.value) return;
+          if (!gestureEnabled.value) return
           runOnJS(movePiece)(
             toPosition({ x: translateX.value, y: translateY.value })
-          );
+          )
         })
         .onFinalize(() => {
-          scale.value = withTiming(1);
-        });
+          scale.value = withTiming(1)
+        })
 
       const style = useAnimatedStyle(() => {
         return {
@@ -226,17 +233,17 @@ const Piece = React.memo(
           transform: [
             { translateX: translateX.value },
             { translateY: translateY.value },
-            { scale: scale.value },
-          ],
-        };
-      });
+            { scale: scale.value }
+          ]
+        }
+      })
 
       const underlay = useAnimatedStyle(() => {
         const position = toPosition({
           x: translateX.value,
-          y: translateY.value,
-        });
-        const translation = toTranslation(position);
+          y: translateY.value
+        })
+        const translation = toTranslation(position)
         return {
           position: 'absolute',
           width: size * 2,
@@ -248,27 +255,27 @@ const Piece = React.memo(
             : 'transparent',
           transform: [
             { translateX: translation.x - size / 2 },
-            { translateY: translation.y - size / 2 },
-          ],
-        };
-      }, [size]);
+            { translateY: translation.y - size / 2 }
+          ]
+        }
+      }, [size])
 
       return (
         <>
-          <Animated.View style={underlay} />
+          <Animated.View style={underlay}/>
           <GestureDetector gesture={gesture}>
             <Animated.View style={style}>
-              <ChessPiece id={id} />
+              <ChessPiece id={id}/>
             </Animated.View>
           </GestureDetector>
         </>
-      );
+      )
     }
   ),
   (prev, next) =>
     prev.id === next.id &&
     prev.size === next.size &&
     prev.square === next.square
-);
+)
 
-export default Piece;
+export default Piece

@@ -1,140 +1,142 @@
-import type { PieceType, Square } from 'chess.js';
+import { useSetBoard } from '@/src/context/board-context/hooks'
+import { useBoardPromotion } from '@/src/context/board-promotion-context/hooks'
+import type { ChessboardRef } from '@/src/context/board-refs-context'
+import { usePieceRefs } from '@/src/context/board-refs-context/hooks'
+import { useChessEngine } from '@/src/context/chess-engine-context/hooks'
+import { useChessboardProps } from '@/src/context/props-context/hooks'
+import { getChessboardState } from '@/src/helpers/get-chessboard-state'
+import { useReversePiecePosition } from '@/src/notation'
+import type { Square } from 'chess.js'
 import React, {
   createContext,
   useCallback,
   useImperativeHandle,
-  useMemo,
-} from 'react';
-import type Animated from 'react-native-reanimated';
-import { useSharedValue } from 'react-native-reanimated';
-import { getChessboardState } from '../../helpers/get-chessboard-state';
+  useMemo
+} from 'react'
+import type Animated from 'react-native-reanimated'
+import { useSharedValue } from 'react-native-reanimated'
 
-import { useReversePiecePosition } from '../../notation';
-import { useSetBoard } from '../board-context/hooks';
-import { useBoardPromotion } from '../board-promotion-context/hooks';
-import type { ChessboardRef } from '../board-refs-context';
-import { usePieceRefs } from '../board-refs-context/hooks';
-import { useChessEngine } from '../chess-engine-context/hooks';
-import { useChessboardProps } from '../props-context/hooks';
+type PromotionPiece = 'q' | 'r' | 'b' | 'n'
 
 type BoardOperationsContextType = {
-  selectableSquares: Animated.SharedValue<Square[]>;
-  onMove: (from: Square, to: Square) => void;
-  onSelectPiece: (square: Square) => void;
-  moveTo: (to: Square) => void;
-  isPromoting: (from: Square, to: Square) => boolean;
-  selectedSquare: Animated.SharedValue<Square | null>;
-  turn: Animated.SharedValue<'w' | 'b'>;
-};
+  selectableSquares: Animated.SharedValue<Square[]>
+  onMove: (from: Square, to: Square) => void
+  onSelectPiece: (square: Square) => void
+  moveTo: (to: Square) => void
+  isPromoting: (from: Square, to: Square) => boolean
+  selectedSquare: Animated.SharedValue<Square | null>
+  turn: Animated.SharedValue<'w' | 'b'>
+}
 
-const BoardOperationsContext = createContext<BoardOperationsContextType>(
-  {} as any
-);
+const BoardOperationsContext = createContext<BoardOperationsContextType | null>(null)
 
 export type BoardOperationsRef = {
-  reset: () => void;
-};
+  reset: () => void
+}
 
 const BoardOperationsContextProviderComponent = React.forwardRef<
   BoardOperationsRef,
   { controller?: ChessboardRef; children?: React.ReactNode }
 >(({ children, controller }, ref) => {
-  const chess = useChessEngine();
-  const setBoard = useSetBoard();
+  const chess = useChessEngine()
+  const setBoard = useSetBoard()
   const {
     pieceSize,
     onMove: onChessboardMoveCallback,
-    colors: { checkmateHighlight },
-  } = useChessboardProps();
-  const { toTranslation } = useReversePiecePosition();
-  const selectableSquares = useSharedValue<Square[]>([]);
-  const selectedSquare = useSharedValue<Square | null>(null);
-  const { showPromotionDialog } = useBoardPromotion();
-  const pieceRefs = usePieceRefs();
+    colors: { checkmateHighlight }
+  } = useChessboardProps()
+  const { toTranslation } = useReversePiecePosition()
+  const selectableSquares = useSharedValue<Square[]>([])
+  const selectedSquare = useSharedValue<Square | null>(null)
+  const { showPromotionDialog } = useBoardPromotion()
+  const pieceRefs = usePieceRefs()
 
-  const turn = useSharedValue(chess.turn());
+  const turn = useSharedValue(chess.turn())
 
   useImperativeHandle(
     ref,
     () => ({
       reset: () => {
-        selectableSquares.value = [];
-        controller?.resetAllHighlightedSquares();
-        turn.value = chess.turn();
-      },
+        selectableSquares.value = []
+        controller?.resetAllHighlightedSquares()
+        turn.value = chess.turn()
+      }
     }),
     [chess, controller, selectableSquares, turn]
-  );
+  )
 
   const isPromoting = useCallback(
     (from: Square, to: Square) => {
-      if (!to.includes('8') && !to.includes('1')) return false;
+      if (!to.includes('8') && !to.includes('1')) return false
 
-      const val = toTranslation(from);
-      const x = Math.floor(val.x / pieceSize);
-      const y = Math.floor(val.y / pieceSize);
-      const piece = chess.board()[y][x];
+      const val = toTranslation(from)
+      const x = Math.floor(val.x / pieceSize)
+      const y = Math.floor(val.y / pieceSize)
+      const piece = chess.board()[y][x]
 
       return (
         piece?.type === chess.PAWN &&
         ((to.includes('8') && piece.color === chess.WHITE) ||
           (to.includes('1') && piece.color === chess.BLACK))
-      );
+      )
     },
     [chess, pieceSize, toTranslation]
-  );
+  )
 
   const findKing = useCallback(
     (type: 'wk' | 'bk') => {
-      const board = chess.board();
+      const board = chess.board()
       for (let x = 0; x < board.length; x++) {
-        const row = board[x];
+        const row = board[x]
         for (let y = 0; y < row.length; y++) {
-          const col = String.fromCharCode(97 + Math.round(x));
+          const col = String.fromCharCode(97 + Math.round(x))
 
           // eslint-disable-next-line no-shadow
-          const row = `${8 - Math.round(y)}`;
-          const square = `${col}${row}` as Square;
+          const row = `${8 - Math.round(y)}`
+          const square = `${col}${row}` as Square
 
-          const piece = chess.get(square);
-          if (piece?.color === type.charAt(0) && piece.type === type.charAt(1))
-            return square;
+          const piece = chess.get(square)
+          if (piece?.color === type.charAt(0) && piece.type === type.charAt(1)) return square
         }
       }
-      return null;
+      return null
     },
     [chess]
-  );
+  )
 
   const moveProgrammatically = useCallback(
-    (from: Square, to: Square, promotionPiece?: PieceType) => {
+    (from: Square, to: Square, promotionPiece?: PromotionPiece) => {
+      if (!chess) {
+        console.error('Chess instance is null, ensure that you are within the ChessEngineContext provider.')
+        return
+      }
       const move = chess.move({
         from,
         to,
-        promotion: promotionPiece as any,
-      });
+        promotion: promotionPiece ?? undefined
+      })
 
-      turn.value = chess.turn();
+      turn.value = chess.turn()
 
-      if (move == null) return;
+      if (move == null) return
 
-      const isCheckmate = chess.in_checkmate();
+      const isCheckmate = chess.isCheckmate()
 
       if (isCheckmate) {
-        const square = findKing(chess.turn() === 'b' ? 'bk' : 'wk');
-        if (!square) return;
-        controller?.highlight({ square, color: checkmateHighlight });
+        const square = findKing(chess.turn() === 'b' ? 'bk' : 'wk')
+        if (!square) return
+        controller?.highlight({ square, color: checkmateHighlight })
       }
 
       onChessboardMoveCallback?.({
         move,
         state: {
           ...getChessboardState(chess),
-          in_promotion: promotionPiece != null,
-        },
-      });
+          in_promotion: promotionPiece != null
+        }
+      })
 
-      setBoard(chess.board());
+      setBoard(chess.board())
     },
     [
       checkmateHighlight,
@@ -143,33 +145,37 @@ const BoardOperationsContextProviderComponent = React.forwardRef<
       findKing,
       onChessboardMoveCallback,
       setBoard,
-      turn,
+      turn
     ]
-  );
+  )
 
   const onMove = useCallback(
     (from: Square, to: Square) => {
-      selectableSquares.value = [];
-      selectedSquare.value = null;
-      const lastMove = { from, to };
-      controller?.resetAllHighlightedSquares();
-      controller?.highlight({ square: lastMove.from });
-      controller?.highlight({ square: lastMove.to });
+      selectableSquares.value = []
+      selectedSquare.value = null
+      const lastMove = { from, to }
+      controller?.resetAllHighlightedSquares()
+      controller?.highlight({ square: lastMove.from })
+      controller?.highlight({ square: lastMove.to })
 
-      const in_promotion = isPromoting(from, to);
-      if (!in_promotion) {
-        moveProgrammatically(from, to);
-        return;
+      const inPromotion = isPromoting(from, to)
+      if (!inPromotion) {
+        moveProgrammatically(from, to)
+        return
       }
 
-      pieceRefs?.current?.[to]?.current?.enable(false);
+      pieceRefs?.current?.[to]?.current?.enable(false)
       showPromotionDialog({
         type: chess.turn(),
         onSelect: (piece) => {
-          moveProgrammatically(from, to, piece);
-          pieceRefs?.current?.[to]?.current?.enable(true);
-        },
-      });
+          if (piece === 'q' || piece === 'r' || piece === 'b' || piece === 'n') {
+            moveProgrammatically(from, to, piece as PromotionPiece)
+          } else {
+            console.error('Invalid piece type:', piece)
+          }
+          pieceRefs?.current?.[to]?.current?.enable(true)
+        }
+      })
     },
     [
       chess,
@@ -179,55 +185,55 @@ const BoardOperationsContextProviderComponent = React.forwardRef<
       pieceRefs,
       selectableSquares,
       selectedSquare,
-      showPromotionDialog,
+      showPromotionDialog
     ]
-  );
+  )
 
   const onSelectPiece = useCallback(
     (square: Square) => {
-      selectedSquare.value = square;
+      selectedSquare.value = square
 
       const validSquares = (chess.moves({
-        square,
-      }) ?? []) as Square[];
+        square
+      }) ?? []) as Square[]
 
       // eslint-disable-next-line no-shadow
       selectableSquares.value = validSquares.map((square) => {
         // handle castling
-        if (square.toString() == 'O-O') {
+        if (square.toString() === 'O-O') {
           if (chess.turn() === 'w') {
-            return 'g1';
+            return 'g1'
           } else {
-            return 'g8';
+            return 'g8'
           }
-        } else if (square.toString() == 'O-O-O') {
+        } else if (square.toString() === 'O-O-O') {
           if (chess.turn() === 'w') {
-            return 'c1';
+            return 'c1'
           } else {
-            return 'c8';
+            return 'c8'
           }
         }
-        const splittedSquare = square.split('x');
+        const splittedSquare = square.split('x')
         if (splittedSquare.length === 0) {
-          return square;
+          return square
         }
 
-        return splittedSquare[splittedSquare.length - 1] as Square;
-      });
+        return splittedSquare[splittedSquare.length - 1] as Square
+      })
     },
     [chess, selectableSquares, selectedSquare]
-  );
+  )
 
   const moveTo = useCallback(
-    (to: Square) => {
+    async (to: Square) => {
       if (selectedSquare.value != null) {
-        controller?.move({ from: selectedSquare.value, to: to });
-        return true;
+        await controller?.move({ from: selectedSquare.value, to })
+        return true
       }
-      return false;
+      return false
     },
     [controller, selectedSquare.value]
-  );
+  )
 
   const value = useMemo(() => {
     return {
@@ -237,8 +243,8 @@ const BoardOperationsContextProviderComponent = React.forwardRef<
       selectableSquares,
       selectedSquare,
       isPromoting,
-      turn,
-    };
+      turn
+    }
   }, [
     isPromoting,
     moveTo,
@@ -246,18 +252,18 @@ const BoardOperationsContextProviderComponent = React.forwardRef<
     onSelectPiece,
     selectableSquares,
     selectedSquare,
-    turn,
-  ]);
+    turn
+  ])
 
   return (
     <BoardOperationsContext.Provider value={value}>
       {children}
     </BoardOperationsContext.Provider>
-  );
-});
+  )
+})
 
 const BoardOperationsContextProvider = React.memo(
   BoardOperationsContextProviderComponent
-);
+)
 
-export { BoardOperationsContextProvider, BoardOperationsContext };
+export { BoardOperationsContextProvider, BoardOperationsContext }

@@ -1,6 +1,6 @@
-import type { ChessInstance } from 'chess.js';
-import { createContext } from 'react';
+import type { Chess } from 'chess.js'
+import { createContext } from 'react'
 
-const ChessEngineContext = createContext<ChessInstance>({} as any);
+const ChessEngineContext = createContext<Chess | null>(null)
 
-export { ChessEngineContext };
+export { ChessEngineContext }

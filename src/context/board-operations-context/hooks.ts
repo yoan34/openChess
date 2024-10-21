@@ -1,9 +1,14 @@
-import { useContext } from 'react';
-
-import { BoardOperationsContext } from './index';
+import { BoardOperationsContext } from '@/src/context/board-operations-context'
+import { useContext } from 'react'
 
 const useBoardOperations = () => {
-  return useContext(BoardOperationsContext);
-};
+  const context = useContext(BoardOperationsContext)
 
-export { useBoardOperations };
+  if (!context) {
+    throw new Error('useBoardOperations must be used within a BoardOperationsProvider')
+  }
+
+  return context
+}
+
+export { useBoardOperations }

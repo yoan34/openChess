@@ -1,4 +1,4 @@
-import { useContext } from 'react';
-import { ChessboardPropsContext } from './index';
+import { ChessboardPropsContext } from '@/src/context/props-context'
+import { useContext } from 'react'
 
-export const useChessboardProps = () => useContext(ChessboardPropsContext);
+export const useChessboardProps = () => useContext(ChessboardPropsContext)
