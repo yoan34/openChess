@@ -3,7 +3,7 @@ import { HighlightedSquares } from '@/components/chessboard/highlighted-squares'
 import { Pieces } from '@/components/chessboard/pieces'
 import { SuggestedDots } from '@/components/chessboard/suggested-dots'
 import { ChessboardContextProvider } from '@/src/context/board-context-provider'
-import { useStartPosition } from "@/src/context/board-flipped/hooks"
+import { useStartPosition } from '@/src/context/board-flipped/hooks'
 import type { ChessboardRef } from '@/src/context/board-refs-context'
 import {
   ChessboardProps,
@@ -63,8 +63,8 @@ const ChessboardContainerComponent = React.forwardRef<
   return (
     <GestureHandlerRootView>
       <ChessboardPropsContextProvider {...props}>
-        <ChessboardContextProvider ref={chessboardRef} fen={props.fen}>
-          <Chessboard startPosition={props.startPosition}/>
+        <ChessboardContextProvider ref={chessboardRef} startPosition={props.startPosition} fen={props.fen}>
+            <Chessboard/>
         </ChessboardContextProvider>
       </ChessboardPropsContextProvider>
     </GestureHandlerRootView>

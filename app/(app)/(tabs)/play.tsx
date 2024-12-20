@@ -63,30 +63,27 @@ function Play () {
       <View style={styles.container}>
         <ThemedText variant="bigTitleTextStyle">DASHBOARD</ThemedText>
         <View style={styles.chessboardContainer}>
-          <Chessboard colors={{ black: '#80728C', white: '#BFB8C5' }} startPosition='black'/>
-
-          {showArrows && (
-            <Svg style={StyleSheet.absoluteFill}>
-              {arrowCoordinatesList.map((coords, index) => (
-                <Line
-                  key={index}
-                  x1={coords.x1}
-                  y1={coords.y1}
-                  x2={coords.x2}
-                  y2={coords.y2}
-                  stroke="red"
-                  strokeWidth="4"
-                />
-              ))}
-            </Svg>
-          )}
+          <Chessboard colors={{ black: '#80728C', white: '#BFB8C5' }} startPosition='black' />
         </View>
-
-        <Pressable onPress={toggleArrows} style={styles.toggleButton}>
-          <ThemedText>{showArrows ? 'Hide Arrows' : 'Show Arrows'}</ThemedText>
-        </Pressable>
-
+        {showArrows && (
+          <Svg style={StyleSheet.absoluteFill}>
+            {arrowCoordinatesList.map((coords, index) => (
+              <Line
+                key={index}
+                x1={coords.x1}
+                y1={coords.y1}
+                x2={coords.x2}
+                y2={coords.y2}
+                stroke="red"
+                strokeWidth="4"
+              />
+            ))}
+          </Svg>
+        )}
       </View>
+      <Pressable onPress={toggleArrows} style={styles.toggleButton}>
+        <ThemedText>{showArrows ? 'Hide Arrows' : 'Show Arrows'}</ThemedText>
+      </Pressable>
     </SafeAreaView>
   )
 }

@@ -45,6 +45,7 @@ const BoardOperationsContextProviderComponent = React.forwardRef<
     onMove: onChessboardMoveCallback,
     colors: { checkmateHighlight }
   } = useChessboardProps()
+  console.log('BoardOperationsContextProviderComponent')
   const { toTranslation } = useReversePiecePosition()
   const selectableSquares = useSharedValue<Square[]>([])
   const selectedSquare = useSharedValue<Square | null>(null)

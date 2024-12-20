@@ -1,6 +1,5 @@
-import { useContext } from 'react'
 import { StartPositionContext } from '@/src/context/board-flipped'
-
+import { useContext } from 'react'
 
 const useStartPosition = () => {
   const context = useContext(StartPositionContext)

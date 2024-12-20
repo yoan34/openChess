@@ -1,4 +1,5 @@
 import { ChessPiece } from '@/components/chessboard/piece/visual-piece'
+import { StartPositionProvider } from '@/src/context/board-flipped'
 import { useBoardOperations } from '@/src/context/board-operations-context/hooks'
 import { useBoardPromotion } from '@/src/context/board-promotion-context/hooks'
 import { usePieceRefs } from '@/src/context/board-refs-context/hooks'
@@ -22,6 +23,7 @@ type PieceProps = {
   startPosition: Vector
   square: Square
   size: number
+  onPieceMove: (from: Square, to: Square) => void
 }
 
 export type ChessPieceRef = {
@@ -35,7 +37,7 @@ function isMove(obj: unknown): obj is Move {
 
 const Piece = React.memo(
   React.forwardRef<ChessPieceRef, PieceProps>(
-    ({ id, startPosition, square, size }, ref) => {
+    ({ id, startPosition, square, size, onPieceMove }, ref) => {
       const chess = useChessEngine()
       const refs = usePieceRefs()
       const pieceEnabled = useSharedValue(true)
@@ -52,7 +54,7 @@ const Piece = React.memo(
         () => turn.value === id.charAt(0) && gestureEnabledFromChessboardProps,
         [id, gestureEnabledFromChessboardProps]
       )
-
+      console.log('Piece')
       const { toPosition, toTranslation } = useReversePiecePosition()
 
       const isGestureActive = useSharedValue(false)
@@ -74,9 +76,10 @@ const Piece = React.memo(
 
       const wrappedOnMoveForJSThread = useCallback(
         ({ move }: { move: Move }) => {
+          onPieceMove(move.from, move.to)
           onMove(move.from, move.to)
         },
-        [onMove]
+        [onMove, onPieceMove]
       )
 
       const moveTo = useCallback(
@@ -261,14 +264,14 @@ const Piece = React.memo(
       }, [size])
 
       return (
-        <>
+        <StartPositionProvider>
           <Animated.View style={underlay}/>
           <GestureDetector gesture={gesture}>
             <Animated.View style={style}>
               <ChessPiece id={id}/>
             </Animated.View>
           </GestureDetector>
-        </>
+        </StartPositionProvider>
       )
     }
   ),

@@ -10,6 +10,7 @@ const HighlightedSquares: React.FC<{ isFlipped: boolean }> = React.memo(({ isFli
   const chess = useChessEngine()
   const board = useMemo(() => chess.board(), [chess])
   const { pieceSize } = useChessboardProps()
+  console.log('HightLightedSquares')
   const { toPosition, toTranslation } = useReversePiecePosition()
   const refs = useSquareRefs()
 

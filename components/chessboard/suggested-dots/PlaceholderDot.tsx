@@ -20,6 +20,7 @@ type PlaceholderDotProps = {
 const PlaceholderDot: React.FC<PlaceholderDotProps> = React.memo(
   ({ x, y, selectableSquares, moveTo }) => {
     const { pieceSize } = useChessboardProps()
+    console.log('PlaceholderDot')
     const { toPosition, toTranslation } = useReversePiecePosition()
 
     const currentSquare = toPosition({ x: x * pieceSize, y: y * pieceSize })

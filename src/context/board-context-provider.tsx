@@ -1,4 +1,5 @@
 import { BoardContext, BoardSetterContext } from '@/src/context/board-context'
+import { StartPositionProvider } from '@/src/context/board-flipped'
 import {
   BoardOperationsContextProvider,
   BoardOperationsRef
@@ -13,12 +14,13 @@ import React, { useImperativeHandle, useMemo, useRef, useState } from 'react'
 type BoardContextProviderProps = {
   fen?: string
   children?: React.ReactNode
+  startPosition?: 'white' | 'black'
 }
 
 const ChessboardContextProviderComponent = React.forwardRef<
   ChessboardRef,
   BoardContextProviderProps
->(({ children, fen }, ref) => {
+>(({ children, fen, startPosition = 'white' }, ref) => {
   const chess = useConst(() => new Chess(fen))
   const chessboardRef = useRef<ChessboardRef>(null)
   const boardOperationsRef = useRef<BoardOperationsRef>(null)
@@ -53,20 +55,22 @@ const ChessboardContextProviderComponent = React.forwardRef<
 
   return (
     <BoardContext.Provider value={board}>
-      <BoardPromotionContextProvider>
-        <ChessEngineContext.Provider value={chess}>
-          <BoardSetterContext.Provider value={setBoard}>
-            <BoardRefsContextProvider ref={chessboardRef}>
-              <BoardOperationsContextProvider
-                ref={boardOperationsRef}
-                controller={chessboardController}
-              >
-                {children}
-              </BoardOperationsContextProvider>
-            </BoardRefsContextProvider>
-          </BoardSetterContext.Provider>
-        </ChessEngineContext.Provider>
-      </BoardPromotionContextProvider>
+      <StartPositionProvider startPosition={startPosition}>
+        <BoardPromotionContextProvider>
+          <ChessEngineContext.Provider value={chess}>
+            <BoardSetterContext.Provider value={setBoard}>
+              <BoardRefsContextProvider ref={chessboardRef}>
+                <BoardOperationsContextProvider
+                  ref={boardOperationsRef}
+                  controller={chessboardController}
+                >
+                  {children}
+                </BoardOperationsContextProvider>
+              </BoardRefsContextProvider>
+            </BoardSetterContext.Provider>
+          </ChessEngineContext.Provider>
+        </BoardPromotionContextProvider>
+      </StartPositionProvider>
     </BoardContext.Provider>
   )
 })

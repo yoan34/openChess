@@ -3,18 +3,42 @@ import { useBoard } from '@/src/context/board-context/hooks'
 import { usePieceRefs } from '@/src/context/board-refs-context/hooks'
 import { useChessboardProps } from '@/src/context/props-context/hooks'
 import { useReversePiecePosition } from '@/src/notation'
-import React from 'react'
+import { openingStore } from '@/stores'
+import React, { useState, useEffect } from 'react'
 
 const Pieces: React.FC<{ isFlipped: boolean }> = React.memo(({ isFlipped }) => {
   const board = useBoard()
   const refs = usePieceRefs()
   const { pieceSize } = useChessboardProps()
+  console.log('Pieces')
   const { toPosition } = useReversePiecePosition()
-  const renderedBoard = isFlipped ? [...board].reverse() : board
+  const [openingID, setOpeningID] = useState<string>('')
+
+  const handleMove = (from: string, to: string) => {
+    setOpeningID((prev) => `${prev}${from}${to},`)
+  }
+  const renderedBoard = board.map((row) => isFlipped ? [...row].reverse() : row)
+  const boardToRender = isFlipped ? [...renderedBoard].reverse() : renderedBoard
+
+  useEffect(() => {
+    const fetchOpening = async () => {
+      if (!openingID) return
+
+      try {
+        console.log('Current Opening ID:', openingID)
+        const opening = await openingStore.fetchOpeningById(openingID)
+        console.log('Opening Data:', opening?.data)
+      } catch (error) {
+        console.error('Error fetching opening:', error)
+      }
+    }
+    fetchOpening()
+
+  }, [openingID])
 
   return (
     <>
-      {renderedBoard.map((row, y) =>
+      {boardToRender.map((row, y) =>
         row.map((piece, x) => {
           if (piece !== null) {
             const square = toPosition({
@@ -30,6 +54,7 @@ const Pieces: React.FC<{ isFlipped: boolean }> = React.memo(({ isFlipped }) => {
                 startPosition={{ x, y }}
                 square={square}
                 size={pieceSize}
+                onPieceMove={handleMove}
               />
             )
           }

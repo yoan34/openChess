@@ -1,3 +1,4 @@
+import { useStartPosition } from '@/src/context/board-flipped/hooks'
 import { useChessboardProps } from '@/src/context/props-context/hooks'
 import type { Vector } from '@/src/types'
 import type { Square } from 'chess.js'
@@ -5,7 +6,8 @@ import { useCallback } from 'react'
 
 const useReversePiecePosition = () => {
   const { pieceSize } = useChessboardProps()
-
+  const { startPosition } = useStartPosition()
+  console.log(startPosition)
   const toTranslation = useCallback(
     (to: Square) => {
       'worklet'
@@ -19,22 +21,36 @@ const useReversePiecePosition = () => {
         x: col.charCodeAt(0) - 'a'.charCodeAt(0),
         y: parseInt(row, 10) - 1
       }
-      return {
-        x: indexes.x * pieceSize,
-        y: 7 * pieceSize - indexes.y * pieceSize
-      }
+      return startPosition === 'white'
+        ? {
+          x: indexes.x * pieceSize,
+          y: 7 * pieceSize - indexes.y * pieceSize
+        }
+        : {
+          x: (7 - indexes.x) * pieceSize,
+          y: indexes.y * pieceSize
+        }
     },
-    [pieceSize]
+    [pieceSize, startPosition]
   )
 
   const toPosition = useCallback(
     ({ x, y }: Vector) => {
       'worklet'
-      const col = String.fromCharCode(97 + Math.round(x / pieceSize))
-      const row = `${8 - Math.round(y / pieceSize)}`
+      const colIndex = Math.round(x / pieceSize)
+      const rowIndex = Math.round(y / pieceSize)
+
+      const col = startPosition === 'white'
+        ? String.fromCharCode(97 + colIndex)
+        : String.fromCharCode(97 + (7 - colIndex))
+
+      const row = startPosition === 'white'
+        ? `${8 - rowIndex}`
+        : `${rowIndex + 1}`
+
       return `${col}${row}` as Square
     },
-    [pieceSize]
+    [pieceSize, startPosition]
   )
 
   return { toPosition, toTranslation }

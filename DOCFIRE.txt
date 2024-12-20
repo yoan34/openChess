@@ -1,0 +1,334 @@
+
+Firestorter
+
+    Firestorter
+    API documentation
+    Examples
+    Guides
+        Installation (web/react-native)
+        Sources, Paths & References
+        Fetching data
+        Adding, Updating & Deleting documents
+        Queries
+        Aggregate collections
+        Fetch modes
+        Geo queries
+        Generics
+        Schema validation
+        Custom documents
+        Subcollections
+        Creating stores
+        Debugging
+    Changelog
+    Acknowledgements
+    License
+
+Edit on github
+Firestorter
+
+    Use Google Firestore in React with zero effort, using MobX 🤘
+
+    🎶 Simple, easy to use API, get up & running in minutes
+    🚀 Fast, only fetches and re-renders data when needed
+    🤘 No clutter, no complex stores/providers/actions/reducers, just go
+
+1. Initialize
+
+import { initializeApp } from 'firebase/app';
+import { getFirestore } from 'firebase/firestore';
+import { initFirestorter } from 'firestorter';
+import makeWebContext from 'firestorter/web';
+
+// Initialize firebase app
+const app = initializeApp({...});
+const firestore = getFirestore(app);
+
+// Initialize `firestorter`
+initFirestorter(makeWebContext({ firestore: firestore }));
+
+    See here on how to use with react-native, compat mode and older firebase SDKs.
+
+2. Create a Collection or Document
+
+import { Collection, Document } from 'firestorter';
+
+const todos = new Collection('todos');
+const user = new Document('users/8273872***');
+
+3. Wrap your Components with mobx's observer pattern
+
+import * as React from 'react';
+import { observer } from 'mobx-react';
+
+const Todos = observer(class Todos extends React.Component {
+  render() {
+    return <div>
+      {todos.docs.map((doc) => (
+        <TodoItem
+          key={doc.id}
+          doc={doc} />
+      ))}
+    </div>;
+  }
+});
+
+const TodoItem = observer(({doc}) => {
+  const { finished, text } = doc.data;
+  return <div>
+    <input type='checkbox' checked={finished} />
+    <input type='text' value={text} />
+  </div>;
+});
+
+That's it. Your Components will now render your firestore data and re-render when data in the back-end changes.
+How it works
+
+Firestorter makes integrating Firestore real-time data into React easy as pie. It does this by providing a simple API for accessing Collection and Document data, whilst taking away the burden of managing snapshot listeners, data-caching and efficiently updating your React components.
+
+It does this by intelligently tracking whether a Collection or Document should be listening for real-time updates (onSnapshot events) or not. Whenever a Component renders a Collection or Document, firestorter enables real-time updates on that resource. And whenever a Component stops using the resource (e.g., component was unmounted), it stops listening for snapshot updates. This behavior really shines when multiple components are rendering collection/document data and it becomes more difficult to determine whether snapshot updates should be enabled or not.
+Features
+
+    Add, update & delete documents
+    Super efficient Component re-rendering
+    Declaratively link document/collection paths to document data
+    Geo query support
+    Easily create aggregate collections from multiple queries
+    Runtime schema validation & Type Generics
+    Manual fetching mode for use with Unit-tests/Async-functions
+    React-native support
+    TypeScript- & Flow typings
+    Works with Vue.js
+
+Want to learn more, head over to the Guides.
+
+
+
+Firestorter
+
+    Firestorter
+    API documentation
+    Examples
+    Guides
+        Installation (web/react-native)
+        Sources, Paths & References
+        Fetching data
+        Adding, Updating & Deleting documents
+        Queries
+        Aggregate collections
+        Fetch modes
+        Geo queries
+        Generics
+        Schema validation
+        Custom documents
+        Subcollections
+        Creating stores
+        Debugging
+    Changelog
+    Acknowledgements
+    License
+
+Edit on github
+Adding documents
+
+Adding documents can be best done using Collection.add, which automatically assigns it a document ID:
+
+const todos = new Collection('todos');
+const doc = await todos.add({
+  finished: false,
+  text: 'new task'
+});
+console.log(doc.id);
+
+Collection.add() returns a Promise with the newly created document. If for whatever reason the operation failed (e.g. no permissions to add the document), the promise is rejected with the appropriate error.
+
+Alternatively, you can use the Document interface to create documents with custom IDs:
+
+const todo = new Document('todos/mydoc');
+
+// Use .set to create the document in the back-end
+todo.set({
+  finished: false,
+  text: 'this is awesome'
+});
+
+Updating documents
+
+Updating documents can be done in 3 different ways:
+Method 	Action
+.update(...) 	Updates an existing document, but fails when document doesn't exist
+.set(...) 	Replaces whole document contents or create document if it doesn't exist
+.set(..., {merge: true}) 	Merges data into existing document or create document if it doesn't exist
+
+import { getFirebase } from 'firestorter';
+const todo = new Document('todos/akskladlkasd887asj');
+
+// Update one or more fields
+await todo.update({
+  finished: true,
+  settings: {}
+});
+
+// Update a nested property using a field-path
+// This will only update `bar` and will leave all
+// other properties in settings and foo untouched.
+await todo.update({
+  'settings.foo.bar': 56
+});
+
+// Properties can also be deleted entirely
+// See: https://firebase.google.com/docs/firestore/manage-data/delete-data
+await todo.update({
+  'settings.foo': getFirebase().firestore.FieldValue.delete()
+});
+// Field-paths can be combined to update multiple
+// properties/objects at once
+await todo.update({
+  'user.batman.isAwesome': true,
+  'user.batman.secretName': 'Bruce Wayne'
+  'user.batman.friends.robin': getFirebase().firestore.FieldValue.delete()
+});
+
+// Alternatively, you can use .set to create
+// or completely overwrite documents
+await todo.set({
+  blank: true
+});
+
+// When {merge: true} is specified to .set, the provided
+// data is merged in case the document already exists
+await todo.set({
+  settings: {
+    foo2: 'hello'
+  }
+}, {merge: true});
+
+Deleting documents
+
+To delete a document, use Document.delete:
+
+const todo = new Document('todos/akskladlkasd887asj');
+await todo.delete();
+
+Deleting whole collections
+
+Firestorter does not yet support deleting whole collections. In order to do that, delete all the documents explicitly and Firestore will delete the Collection automatically.
+
+
+
+Firestorter
+
+    Firestorter
+    API documentation
+    Examples
+    Guides
+        Installation (web/react-native)
+        Sources, Paths & References
+        Fetching data
+        Adding, Updating & Deleting documents
+        Queries
+        Aggregate collections
+        Fetch modes
+        Geo queries
+        Generics
+        Schema validation
+        Custom documents
+        Subcollections
+        Creating stores
+        Debugging
+    Changelog
+    Acknowledgements
+    License
+
+Edit on github
+Queries
+
+Using queries, you can filter, sort and limit the data that is returned in a Collection. Queries can be set in the constructor or afterwards using the query property.
+Query functions
+
+To set a query on a Collection, create a function that returns a Firestore Query object. The function takes a Firestore CollectionReference as input and should return a Firestore Query. The function is "smart", in such a way that it is automatically re-evaluated whenever the Collection.ref changes or when an observable changes that was accessed inside the Query Function.
+
+const col = new Collection('todos', {
+  query: (ref) => ref.where('finished', '==', false).limit(10)
+});
+
+Queries can also be set or re-set aftwards:
+
+const col = new Collection('todos');
+
+// Show only the documents that not finished, with a max-limit of 10
+col.query = (ref) => ref.where('finished', '==', false).limit(10);
+
+// Reset query to show all data in the collection
+col.query = undefined;
+
+Reactive query functions
+
+When the Query Function accesses an observable, it will automatically be re-evaluated whenever that observable changes.
+
+React Example:
+
+const TodosView extends Component {
+  constructor(props) {
+    super(props);
+    this._pageLimit = observable.box(10);
+    this._col = new Collection('todos', {
+      query: (ref) => ref.limit(this._pageLimit)
+    });
+  }
+
+  render() {
+   return (
+     <div>
+       {this._col.docs.map(doc => <TodoItem doc={doc} />)}
+     </div>
+   );
+  }
+
+  onUpdatePageLimit = (limit) => {
+    // Changing the observable will cause the query to be
+    // automatically re-evaluated with the new limit
+    this._pageLimit.set(limit);
+  };
+}
+
+Since Document objects are also observables, it is also possible to link queries to document-data. In the following example, the Collection query is updated whenever the showFinished field in the settings Document is updated.
+
+const settingsDoc = new Document('settings');
+const col = new Collection('todos', {
+  query: (ref) => ref.where('finished', '==', settingsDoc.data.showFinished)
+});
+autorun(() => {
+  console.log(col.docs);
+});
+
+Disabling a Collection from within a Query
+
+In some cases, the observed data inside the Query function indicates that the Collection should not query any data. In that case the query function may return null to disable the Collection.
+
+const userId = observable.box(undefined);
+const col = new Collection('todos');
+
+// Define query that selects all todos for a specific user,
+// and disables the Collection when no user is selected.
+col.query = (ref) => {
+  const userId = userId.get();
+  return userId
+      ? ref.where('userId', '==', userId)  // Get todos for specific user
+      : null; // Disable collection when no user specified
+};
+
+...
+
+// User logs in
+userId.set('mjkhasdjk8278238223');
+
+...
+
+// User logs out
+userId.set(undefined);
+
+See also
+
+    Aggregate collections
+    Geo queries
+

@@ -2,14 +2,14 @@ import React, { createContext, useCallback, useContext, useMemo, useState } from
 
 // Définition du type pour le contexte
 type StartPositionContextType = {
-  startPosition: 'white' | 'black';
-  setStartPosition: (position: 'white' | 'black') => void;
-};
+  startPosition: 'white' | 'black'
+  setStartPosition: (position: 'white' | 'black') => void
+}
 
 const StartPositionContext = createContext<StartPositionContextType | undefined>(undefined)
 
-const StartPositionProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [startPosition, setStartPositionState] = useState<'white' | 'black'>('white')
+const StartPositionProvider: React.FC<{ children: React.ReactNode; startPosition?: 'white' | 'black' }> = ({ children, startPosition: initialStartPosition = 'white' }) => {
+  const [startPosition, setStartPositionState] = useState<'white' | 'black'>(initialStartPosition)
 
   const setStartPosition = useCallback((position: 'white' | 'black') => {
     setStartPositionState(position)
