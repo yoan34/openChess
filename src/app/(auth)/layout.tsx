@@ -1,5 +1,5 @@
-import { Sidebar } from '@/components/layouts/sidebar'
 import React from 'react'
+import { Sidebar } from '@/components/layouts/sidebar'
 
 export default function AuthLayout({
   children,
