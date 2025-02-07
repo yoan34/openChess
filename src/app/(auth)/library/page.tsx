@@ -1,3 +1,3 @@
 export default function Page() {
-  return <div>Opening</div>
+  return <div>Library</div>
 }

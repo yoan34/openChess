@@ -1,3 +1,3 @@
 export default function Page() {
-  return <div>forgot-password</div>
+  return <div>reset-password</div>
 }

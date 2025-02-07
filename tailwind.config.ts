@@ -8,9 +8,22 @@ export default {
   ],
   theme: {
     extend: {
+      fontFamily: {
+        baloo: ['var(--font-baloo)'],
+      },
       colors: {
-        background: "var(--background)",
-        foreground: "var(--foreground)",
+        primary: "var(--primary)",
+        primaryDisabled: "color-mix(in srgb, var(--primary) 30%, transparent)",
+        grey: {
+          900: "var(--grey-900)",
+          700: "var(--grey-700)",
+          300: "var(--grey-300)",
+          100: "var(--grey-100)",
+        },
+        blue: "var(--blue)",
+        yellow: "var(--yellow)",
+        yellowDisabled: "color-mix(in srgb, var(--yellow) 30%, transparent)",
+        red: "var(--red)",
       },
     },
   },

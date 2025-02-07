@@ -1,3 +1,3 @@
 export default function Page() {
-  return <div>faq</div>
+  return <div>contact</div>
 }
