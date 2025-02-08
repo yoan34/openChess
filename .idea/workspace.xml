@@ -6,10 +6,6 @@
   <component name="ChangeListManager">
     <list default="true" id="76dddf9b-bf9b-4cf4-91b6-baea2b541b36" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/package.json" beforeDir="false" afterPath="$PROJECT_DIR$/package.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/components/chess/chessboard.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/chess/chessboard.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/components/layouts/sidebar.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/layouts/sidebar.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/tsconfig.json" beforeDir="false" afterPath="$PROJECT_DIR$/tsconfig.json" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -78,7 +74,7 @@
       <workItem from="1738922251462" duration="3253000" />
       <workItem from="1738926856749" duration="1134000" />
       <workItem from="1738934242147" duration="9965000" />
-      <workItem from="1738970909656" duration="2021000" />
+      <workItem from="1738970909656" duration="3909000" />
     </task>
     <servers />
   </component>
