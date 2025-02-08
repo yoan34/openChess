@@ -1,192 +1,194 @@
 'use client'
-import { Chessboard } from "react-chessboard";
-import { Chess } from 'chess.js';
-import { useState, useMemo } from 'react';
+import { Chessboard } from 'react-chessboard'
+import { Chess, Square,  Move } from 'chess.js'
+import { useState, useMemo, JSX } from 'react'
+
+type CustomPieces = {
+  [key: string]: ({ squareWidth }: { squareWidth: number }) => JSX.Element
+}
+
+type SquareStyles = {
+  [square: string]: {
+    background?: string
+    borderRadius?: string
+  }
+}
 
 export function CustomChessBoard() {
-  // États
-  const [game, setGame] = useState(new Chess());
-  const [moveFrom, setMoveFrom] = useState("");
-  const [optionSquares, setOptionSquares] = useState({});
-  const [showSafeSquares, setShowSafeSquares] = useState(false);
-  const [safeSquares, setSafeSquares] = useState({});
+  const [game, setGame] = useState<Chess>(new Chess())
+  const [moveFrom, setMoveFrom] = useState<Square | ''>('')
+  const [optionSquares, setOptionSquares] = useState<SquareStyles>({})
+  const [showSafeSquares, setShowSafeSquares] = useState<boolean>(false)
+  const [safeSquares, setSafeSquares] = useState<SquareStyles>({})
 
-  // Gestion du jeu
-  function safeGameMutate(modify) {
+  function safeGameMutate(modify: (game: Chess) => void): void {
     setGame((currentGame) => {
-      const update = new Chess(currentGame.fen());
-      modify(update);
-      updateSafeSquares();
-      return update;
-    });
+      const update = new Chess(currentGame.fen())
+      modify(update)
+      updateSafeSquares()
+      return update
+    })
   }
 
-  // Mise à jour des cases sûres
-  function updateSafeSquares() {
+  function updateSafeSquares(): void {
     if (showSafeSquares) {
-      setSafeSquares(findSafeSquares());
+      setSafeSquares(findSafeSquares())
     } else {
-      setSafeSquares({});
+      setSafeSquares({})
     }
   }
 
-  // Trouver les cases sûres
-  function findSafeSquares() {
-    const files = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h'];
-    const ranks = ['1', '2', '3', '4', '5', '6', '7', '8'];
-    const allSquares = files.flatMap(file => ranks.map(rank => file + rank));
+  function findSafeSquares(): SquareStyles {
+    const files = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h']
+    const ranks = ['1', '2', '3', '4', '5', '6', '7', '8']
+    const allSquares = files.flatMap(file => ranks.map(rank => file + rank)) as Square[]
 
-    // Cases menacées par les noirs
-    const blackThreatenedSquares = new Set();
+    const blackThreatenedSquares = new Set<Square>()
+    const potentialWhiteSquares = new Set<Square>()
+
     allSquares.forEach(square => {
-      const piece = game.get(square);
+      const piece = game.get(square)
       if (piece && piece.color === 'b') {
-        const moves = game.moves({ square, verbose: true });
-        moves.forEach(move => blackThreatenedSquares.add(move.to));
+        const moves = game.moves({ square, verbose: true })
+        moves.forEach(move => blackThreatenedSquares.add(move.to as Square))
       }
-    });
+    })
 
-    // Cases possibles pour les blancs
-    const potentialWhiteSquares = new Set();
     allSquares.forEach(square => {
-      const piece = game.get(square);
+      const piece = game.get(square)
       if (piece && piece.color === 'w') {
-        const moves = game.moves({ square, verbose: true });
+        const moves = game.moves({ square, verbose: true })
         moves.forEach(move => {
-          if (!blackThreatenedSquares.has(move.to)) {
-            potentialWhiteSquares.add(move.to);
+          if (!blackThreatenedSquares.has(move.to as Square)) {
+            potentialWhiteSquares.add(move.to as Square)
           }
-        });
+        })
       }
-    });
+    })
 
-    const newSquares = {};
+    const newSquares: SquareStyles = {}
     potentialWhiteSquares.forEach(square => {
       newSquares[square] = {
-        background: "rgba(0, 0, 255, 0.2)"
-      };
-    });
+        background: 'rgba(0, 0, 255, 0.2)'
+      }
+    })
 
-    return newSquares;
+    return newSquares
   }
 
-  // Obtenir les coups possibles pour une pièce
-  function getMoveOptions(square) {
+  function getMoveOptions(square: Square): SquareStyles | false {
     const moves = game.moves({
       square,
       verbose: true
-    });
+    })
     if (moves.length === 0) {
-      return false;
+      return false
     }
 
-    const newSquares = {};
-    moves.map((move) => {
+    const newSquares: SquareStyles = {}
+    moves.forEach((move: Move) => {
       newSquares[move.to] = {
         background:
-          game.get(move.to) && game.get(move.to).color !== game.get(square).color
-            ? "radial-gradient(circle, rgba(0,0,0,.1) 85%, transparent 85%)"
-            : "radial-gradient(circle, rgba(0,0,0,.1) 25%, transparent 25%)",
-        borderRadius: "50%"
-      };
-    });
+          game.get(move.to) && game.get(move.to)?.color !== game.get(square)?.color
+            ? 'radial-gradient(circle, rgba(0,0,0,.1) 85%, transparent 85%)'
+            : 'radial-gradient(circle, rgba(0,0,0,.1) 25%, transparent 25%)',
+        borderRadius: '50%'
+      }
+    })
     newSquares[square] = {
-      background: "rgba(255, 255, 0, 0.4)"
-    };
-    return newSquares;
+      background: 'rgba(255, 255, 0, 0.4)'
+    }
+    return newSquares
   }
 
-  // Gestionnaires d'événements d'interaction
-  function onPieceDragBegin(piece, sourceSquare) {
-    const squares = getMoveOptions(sourceSquare);
+  function onPieceDragBegin(_piece: string, sourceSquare: Square): void {
+    const squares = getMoveOptions(sourceSquare)
     if (squares) {
-      setOptionSquares(squares);
+      setOptionSquares(squares)
     }
   }
 
-  function onPieceDragEnd() {
-    setOptionSquares({});
+  function onPieceDragEnd(): void {
+    setOptionSquares({})
   }
 
-  function onDrop(sourceSquare, targetSquare, piece) {
-    const gameCopy = new Chess(game.fen());
+  function onDrop(sourceSquare: Square, targetSquare: Square, piece: string): boolean {
+    const gameCopy = new Chess(game.fen())
     const move = gameCopy.move({
       from: sourceSquare,
       to: targetSquare,
-      promotion: piece[1].toLowerCase() ?? "q",
-    });
+      promotion: piece[1].toLowerCase() ?? 'q'
+    })
 
     if (move) {
-      setGame(gameCopy);
-      setOptionSquares({});
-      updateSafeSquares();
-      return true;
+      setGame(gameCopy)
+      setOptionSquares({})
+      updateSafeSquares()
+      return true
     }
-    return false;
+    return false
   }
 
-  function onSquareClick(square) {
+  function onSquareClick(square: Square): void {
     if (!moveFrom) {
-      const squares = getMoveOptions(square);
+      const squares = getMoveOptions(square)
       if (squares) {
-        setMoveFrom(square);
-        setOptionSquares(squares);
+        setMoveFrom(square)
+        setOptionSquares(squares)
       }
-      return;
+      return
     }
 
     if (moveFrom === square) {
-      setMoveFrom("");
-      setOptionSquares({});
-      return;
+      setMoveFrom('')
+      setOptionSquares({})
+      return
     }
 
-    const gameCopy = new Chess(game.fen());
+    const gameCopy = new Chess(game.fen())
     const move = gameCopy.move({
       from: moveFrom,
       to: square,
-      promotion: "q"
-    });
+      promotion: 'q'
+    })
 
     if (move === null) {
-      const squares = getMoveOptions(square);
+      const squares = getMoveOptions(square)
       if (squares) {
-        setMoveFrom(square);
-        setOptionSquares(squares);
+        setMoveFrom(square)
+        setOptionSquares(squares)
       }
-      return;
+      return
     }
 
-    setGame(gameCopy);
-    setMoveFrom("");
-    setOptionSquares({});
-    updateSafeSquares();
+    setGame(gameCopy)
+    setMoveFrom('')
+    setOptionSquares({})
+    updateSafeSquares()
   }
 
-  // Vérifier si une pièce peut être déplacée
-  function isDraggablePiece({ piece }) {
-    return piece.startsWith(game.turn());
+  function isDraggablePiece({ piece }: { piece: string }): boolean {
+    return piece.startsWith(game.turn())
   }
 
-  // Configuration des pièces personnalisées
-  const pieces = ["wP", "wN", "wB", "wR", "wQ", "wK", "bP", "bN", "bB", "bR", "bQ", "bK"];
+  const pieces = ['wP', 'wN', 'wB', 'wR', 'wQ', 'wK', 'bP', 'bN', 'bB', 'bR', 'bQ', 'bK'] as const
 
-  const customPieces = useMemo(() => {
-    const pieceComponents = {};
+  const customPieces = useMemo((): CustomPieces => {
+    const pieceComponents: CustomPieces = {}
     pieces.forEach(piece => {
-      pieceComponents[piece] = ({ squareWidth }) => (
+      pieceComponents[piece] = ({ squareWidth }: { squareWidth: number }) => (
         <div
           style={{
             width: squareWidth,
             height: squareWidth,
             backgroundImage: `url(/pieces/style1/${piece}.png)`,
-            backgroundSize: "100%"
+            backgroundSize: '100%'
           }}
         />
-      );
-    });
-    return pieceComponents;
-  }, []);
+      )
+    })
+    return pieceComponents
+  }, [])
 
   return (
     <div className="flex flex-col items-center space-y-4">
@@ -197,11 +199,11 @@ export function CustomChessBoard() {
           id="safeSquares"
           checked={showSafeSquares}
           onChange={(e) => {
-            setShowSafeSquares(e.target.checked);
+            setShowSafeSquares(e.target.checked)
             if (e.target.checked) {
-              setSafeSquares(findSafeSquares());
+              setSafeSquares(findSafeSquares())
             } else {
-              setSafeSquares({});
+              setSafeSquares({})
             }
           }}
           className="h-4 w-4"
@@ -223,14 +225,14 @@ export function CustomChessBoard() {
           onSquareClick={onSquareClick}
           isDraggablePiece={isDraggablePiece}
           customBoardStyle={{
-            borderRadius: "4px",
-            boxShadow: "0 2px 10px rgba(0, 0, 0, 0.5)"
+            borderRadius: '4px',
+            boxShadow: '0 2px 10px rgba(0, 0, 0, 0.5)'
           }}
           customDarkSquareStyle={{
-            backgroundColor: "#779952"
+            backgroundColor: '#779952'
           }}
           customLightSquareStyle={{
-            backgroundColor: "#edeed1"
+            backgroundColor: '#edeed1'
           }}
           customPieces={customPieces}
           customSquareStyles={{
@@ -248,10 +250,10 @@ export function CustomChessBoard() {
           className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors"
           onClick={() => {
             safeGameMutate((game) => {
-              game.reset();
-              setMoveFrom("");
-              setOptionSquares({});
-            });
+              game.reset()
+              setMoveFrom('')
+              setOptionSquares({})
+            })
           }}
         >
           Reset
@@ -261,10 +263,10 @@ export function CustomChessBoard() {
           className="px-4 py-2 bg-gray-500 text-white rounded hover:bg-gray-600 transition-colors"
           onClick={() => {
             safeGameMutate((game) => {
-              game.undo();
-              setMoveFrom("");
-              setOptionSquares({});
-            });
+              game.undo()
+              setMoveFrom('')
+              setOptionSquares({})
+            })
           }}
         >
           Undo
@@ -276,5 +278,5 @@ export function CustomChessBoard() {
         Tour : {game.turn() === 'w' ? 'Blancs' : 'Noirs'}
       </div>
     </div>
-  );
+  )
 }
